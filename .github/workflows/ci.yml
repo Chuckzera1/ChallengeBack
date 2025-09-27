@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 jobs:
-  build-and-test:
+  tests:
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -51,4 +51,5 @@ jobs:
             --configuration Release \
             --no-build \
             --collect:"XPlat Code Coverage" \
-            --logger "trx;LogFileName=test_results.trx"
+            --logger "trx;LogFileName=test_results.trx" \
+            --verbosity normal
