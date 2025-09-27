@@ -1,0 +1,44 @@
+name: Auto PR develop -> master
+
+on:
+  push:
+    branches: [develop]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  open-pr:
+    if: ${{ github.event.repository.fork == false }}
+    runs-on: ubuntu-latest
+    concurrency:
+      group: auto-pr-develop-to-master
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch master
+        run: git fetch origin master:master || true
+
+      - name: Create or Update PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: 'Sync develop → master'
+          body: |
+            PR automático aberto após push na `develop`.
+            Faça o review e merge quando os checks passarem.
+          base: master
+          branch: auto/sync-develop-into-master
+          draft: false
+          labels: |
+            automation
+            sync
+          assignees: |
+            ${{ github.actor }}
+          delete-branch: true
