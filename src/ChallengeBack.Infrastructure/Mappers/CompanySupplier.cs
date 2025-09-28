@@ -13,6 +13,15 @@ public class CompanySupplierMapper : IEntityTypeConfiguration<CompanySupplier>
         builder.Property(cs => cs.CompanyId).IsRequired();
         builder.Property(cs => cs.SupplierId).IsRequired();
         builder.Property(cs => cs.StartDate).IsRequired();
-        builder.Property(cs => cs.EndDate).IsRequired();
+        
+        builder.HasOne(cs => cs.Company)
+            .WithMany(c => c.CompanySuppliers)
+            .HasForeignKey(cs => cs.CompanyId)
+            .OnDelete(DeleteBehavior.Cascade);
+            
+        builder.HasOne(cs => cs.Supplier)
+            .WithMany(s => s.CompanySuppliers)
+            .HasForeignKey(cs => cs.SupplierId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
