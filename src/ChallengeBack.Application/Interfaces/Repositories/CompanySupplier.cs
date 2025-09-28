@@ -1,6 +1,6 @@
 using ChallengeBack.Domain.Entities;
 
-namespace ChallengeBack.Application.Interfaces;
+namespace ChallengeBack.Application.Interfaces.Repositories;
 
 public interface ICompanySupplierRepository
 {

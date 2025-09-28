@@ -20,6 +20,7 @@ services:
   api:
     build: .
     environment:
+      - PORT=8080
       - ASPNETCORE_ENVIRONMENT=Docker
       - ASPNETCORE_URLS=http://+:8080
     ports:
