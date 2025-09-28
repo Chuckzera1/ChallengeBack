@@ -8,9 +8,9 @@ public class Supplier
     public PersonType Type { get; set; }
     public string? Cpf { get; set; }
     public string? Cnpj { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string ZipCode { get; set; } = string.Empty;
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string ZipCode { get; set; }
     public string? Rg { get; set; }
     public DateTime? BirthDate { get; set; }
     public DateTime CreatedAt { get; set; }
