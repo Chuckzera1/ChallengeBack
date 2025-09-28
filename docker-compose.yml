@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ChallengeBackDb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migration:
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    working_dir: /src
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/src
+    command: ["sh", "-c", "cd /src && dotnet tool install --global dotnet-ef --version 9.0.1 && /root/.dotnet/tools/dotnet-ef database update --project src/ChallengeBack.Infrastructure --startup-project src/ChallengeBack.Api"]
+
+  api:
+    build: .
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Docker
+      - ASPNETCORE_URLS=http://+:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - migration
+
+volumes:
+  postgres_data:
