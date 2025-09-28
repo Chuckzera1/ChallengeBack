@@ -1,4 +1,4 @@
-using ChallengeBack.Application.Interfaces;
+using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +16,10 @@ public class CompanyRepository : ICompanyRepository
 
     public async Task<Company> GetByIdAsync(int id) => await _context.Companies.FindAsync(id) ?? throw new Exception("Company not found");
     public async Task<IEnumerable<Company>> GetAllAsync() => await _context.Companies.ToListAsync();
-    public async Task<Company> AddAsync(Company company)
+    public async Task<Company> AddAsync(Company company, CancellationToken ct)
     {
         await _context.Companies.AddAsync(company);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return company;
     }
     public async Task<Company> UpdateAsync(Company company)
@@ -28,11 +28,10 @@ public class CompanyRepository : ICompanyRepository
         await _context.SaveChangesAsync();
         return company;
     }
-    public async Task<Company> DeleteAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var company = await GetByIdAsync(id);
         _context.Companies.Remove(company);
         await _context.SaveChangesAsync();
-        return company;
     }
 }
