@@ -17,18 +17,6 @@ services:
       timeout: 5s
       retries: 5
 
-  migration:
-    image: mcr.microsoft.com/dotnet/sdk:9.0
-    working_dir: /src
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Docker
-    depends_on:
-      postgres:
-        condition: service_healthy
-    volumes:
-      - .:/src
-    command: ["sh", "-c", "cd /src && dotnet tool install --global dotnet-ef --version 9.0.1 && /root/.dotnet/tools/dotnet-ef database update --project src/ChallengeBack.Infrastructure --startup-project src/ChallengeBack.Api"]
-
   api:
     build: .
     environment:
@@ -37,7 +25,8 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - migration
+      postgres:
+        condition: service_healthy
 
 volumes:
   postgres_data:

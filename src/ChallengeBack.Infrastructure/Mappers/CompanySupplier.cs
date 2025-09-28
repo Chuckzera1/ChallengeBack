@@ -12,7 +12,6 @@ public class CompanySupplierMapper : IEntityTypeConfiguration<CompanySupplier>
         builder.Property(cs => cs.Id).ValueGeneratedOnAdd();
         builder.Property(cs => cs.CompanyId).IsRequired();
         builder.Property(cs => cs.SupplierId).IsRequired();
-        builder.Property(cs => cs.StartDate).IsRequired();
         
         builder.HasOne(cs => cs.Company)
             .WithMany(c => c.CompanySuppliers)
