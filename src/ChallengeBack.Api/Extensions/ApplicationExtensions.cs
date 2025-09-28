@@ -9,7 +9,7 @@ public static class ApplicationExtensions
     {
         // Register services (use cases)
         services.AddScoped<ICreateCompanyService, CreateCompanyService>();
-        
+        services.AddScoped<IDeleteCompanyService, DeleteCompanyService>();
         // TODO: Add other services when they are created
         // services.AddScoped<IGetCompanyService, GetCompanyService>();
         // services.AddScoped<IUpdateCompanyService, UpdateCompanyService>();
