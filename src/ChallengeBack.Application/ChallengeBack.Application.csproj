@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ChallengeBack.Domain\ChallengeBack.Domain.csproj" />
-    <ProjectReference Include="..\ChallengeBack.Infrastructure\ChallengeBack.Infrastructure.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
