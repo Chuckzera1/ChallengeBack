@@ -27,6 +27,7 @@ public static class ApplicationExtensions
         // CompanySupplier
         services.AddScoped<IAddCompanySupplierService, CreateCompanySupplierService>();
         services.AddScoped<IDeleteCompanySupplierService, DeleteCompanySupplierService>();
+        services.AddScoped<IGetAllCompanySuppliersService, GetAllCompanySuppliersService>();
 
         return services;
     }

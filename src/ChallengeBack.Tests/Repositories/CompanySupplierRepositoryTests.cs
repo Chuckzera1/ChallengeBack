@@ -1,3 +1,5 @@
+using ChallengeBack.Application.Dto.CompanySupplier;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Domain.Enums;
 using ChallengeBack.Infrastructure.Data;
@@ -349,5 +351,232 @@ public class CompanySupplierRepositoryTests : IClassFixture<PostgresFixture>
         Assert.Equal(companySupplier.Id, result.Id);
         Assert.Equal(company.Id, result.CompanyId);
         Assert.Equal(newSupplier.Id, result.SupplierId);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_ShouldReturnEmpty_WhenNoCompanySuppliersExist()
+    {
+        await CleanDatabaseAsync();
+        
+        var filter = new GetAllCompanySupplierFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Empty(result.Data);
+        Assert.Equal(0, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_ShouldReturnAllCompanySuppliers_WhenCompanySuppliersExist()
+    {
+        await CleanDatabaseAsync();
+        
+        var (company, supplier) = await CreateTestEntitiesAsync();
+        
+        var companySuppliers = new List<CompanySupplier>
+        {
+            new CompanySupplier
+            {
+                CompanyId = company.Id,
+                SupplierId = supplier.Id
+            }
+        };
+
+        _context.CompanySuppliers.AddRange(companySuppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanySupplierFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(1, result.Data.Count());
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+        Assert.Contains(result.Data, cs => cs.CompanyId == company.Id);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithPagination_ShouldReturnCorrectPage()
+    {
+        await CleanDatabaseAsync();
+        
+        var (company, supplier) = await CreateTestEntitiesAsync();
+        
+        var companySuppliers = new List<CompanySupplier>();
+        for (int i = 1; i <= 15; i++)
+        {
+            var newSupplier = new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = $"{i:D11}",
+                Name = $"Supplier {i}",
+                Email = $"supplier{i}@test.com",
+                ZipCode = $"{i:D8}"
+            };
+            _context.Suppliers.Add(newSupplier);
+            await _context.SaveChangesAsync();
+            
+            companySuppliers.Add(new CompanySupplier
+            {
+                CompanyId = company.Id,
+                SupplierId = newSupplier.Id
+            });
+        }
+
+        _context.CompanySuppliers.AddRange(companySuppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanySupplierFilterDto { Page = 2, Limit = 5 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(5, result.Data.Count());
+        Assert.Equal(15, result.TotalCount);
+        Assert.Equal(2, result.Page);
+        Assert.Equal(5, result.Limit);
+        Assert.Equal(3, result.TotalPages);
+        Assert.True(result.HasNextPage);
+        Assert.True(result.HasPreviousPage);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithCompanyIdFilter_ShouldReturnFilteredCompanySuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var company1 = new Company
+        {
+            Cnpj = "12345678000195",
+            FantasyName = "Company 1",
+            ZipCode = "12345678",
+            State = "SP"
+        };
+        
+        var company2 = new Company
+        {
+            Cnpj = "98765432000123",
+            FantasyName = "Company 2",
+            ZipCode = "87654321",
+            State = "RJ"
+        };
+
+        _context.Companies.AddRange(company1, company2);
+        await _context.SaveChangesAsync();
+
+        var supplier = new Supplier
+        {
+            Type = PersonType.Company,
+            Cnpj = "11111111000111",
+            Name = "Test Supplier",
+            Email = "supplier@test.com",
+            ZipCode = "11111111"
+        };
+
+        _context.Suppliers.Add(supplier);
+        await _context.SaveChangesAsync();
+
+        var companySuppliers = new List<CompanySupplier>
+        {
+            new CompanySupplier { CompanyId = company1.Id, SupplierId = supplier.Id },
+            new CompanySupplier { CompanyId = company2.Id, SupplierId = supplier.Id }
+        };
+
+        _context.CompanySuppliers.AddRange(companySuppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanySupplierFilterDto { CompanyId = company1.Id, Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal(company1.Id, result.Data.First().CompanyId);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithSupplierIdFilter_ShouldReturnFilteredCompanySuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var company = new Company
+        {
+            Cnpj = "12345678000195",
+            FantasyName = "Test Company",
+            ZipCode = "12345678",
+            State = "SP"
+        };
+
+        _context.Companies.Add(company);
+        await _context.SaveChangesAsync();
+
+        var supplier1 = new Supplier
+        {
+            Type = PersonType.Company,
+            Cnpj = "11111111000111",
+            Name = "Supplier 1",
+            Email = "supplier1@test.com",
+            ZipCode = "11111111"
+        };
+
+        var supplier2 = new Supplier
+        {
+            Type = PersonType.Individual,
+            Cpf = "22222222222",
+            Name = "Supplier 2",
+            Email = "supplier2@test.com",
+            ZipCode = "22222222"
+        };
+
+        _context.Suppliers.AddRange(supplier1, supplier2);
+        await _context.SaveChangesAsync();
+
+        var companySuppliers = new List<CompanySupplier>
+        {
+            new CompanySupplier { CompanyId = company.Id, SupplierId = supplier1.Id },
+            new CompanySupplier { CompanyId = company.Id, SupplierId = supplier2.Id }
+        };
+
+        _context.CompanySuppliers.AddRange(companySuppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanySupplierFilterDto { SupplierId = supplier1.Id, Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal(supplier1.Id, result.Data.First().SupplierId);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_ShouldIncludeNavigationProperties()
+    {
+        await CleanDatabaseAsync();
+        
+        var (company, supplier) = await CreateTestEntitiesAsync();
+        
+        var companySupplier = new CompanySupplier
+        {
+            CompanyId = company.Id,
+            SupplierId = supplier.Id
+        };
+
+        _context.CompanySuppliers.Add(companySupplier);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanySupplierFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        
+        var companySupplierResult = result.Data.First();
+        Assert.NotNull(companySupplierResult.Company);
+        Assert.NotNull(companySupplierResult.Supplier);
+        Assert.Equal(company.Cnpj, companySupplierResult.Company.Cnpj);
+        Assert.Equal(supplier.Name, companySupplierResult.Supplier.Name);
     }
 }
