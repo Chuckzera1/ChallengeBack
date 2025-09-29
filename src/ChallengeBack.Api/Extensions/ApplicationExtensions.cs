@@ -18,10 +18,7 @@ public static class ApplicationExtensions
 
         // Supplier
         services.AddScoped<ICreateSupplierService, CreateSupplierService>();
-        // TODO: Add other services when they are created
-        // services.AddScoped<IGetCompanyService, GetCompanyService>();
-        // services.AddScoped<IUpdateCompanyService, UpdateCompanyService>();
-        // services.AddScoped<IDeleteCompanyService, DeleteCompanyService>();
+        services.AddScoped<IGetAllSuppliersWithFilterService, GetAllSuppliersWithFilterService>();
 
         return services;
     }
