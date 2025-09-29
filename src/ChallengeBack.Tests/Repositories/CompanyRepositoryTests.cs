@@ -1,4 +1,5 @@
 using ChallengeBack.Domain.Entities;
+using ChallengeBack.Domain.Enums;
 using ChallengeBack.Infrastructure.Data;
 using ChallengeBack.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,6 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
 
     private async Task CleanDatabaseAsync()
     {
-        // Remove all data from all tables
         _context.Companies.RemoveRange(_context.Companies);
         await _context.SaveChangesAsync();
     }
@@ -43,15 +43,13 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
             Cnpj = "12345678000195",
             FantasyName = "Test Company",
             ZipCode = "12345678",
-            State = "SP",
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            State = "SP"
         };
 
         _context.Companies.Add(company);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetByIdAsync(company.Id);
+        var result = await _repository.GetByIdAsync(company.Id, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(company.Id, result.Id);
@@ -59,6 +57,8 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         Assert.Equal(company.FantasyName, result.FantasyName);
         Assert.Equal(company.ZipCode, result.ZipCode);
         Assert.Equal(company.State, result.State);
+        Assert.True(result.CreatedAt != DateTime.MinValue);
+        Assert.True(result.UpdatedAt != DateTime.MinValue);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         
         var nonExistentId = 999;
 
-        var exception = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(nonExistentId));
+        var exception = await Assert.ThrowsAsync<Exception>(() => _repository.GetByIdAsync(nonExistentId, CancellationToken.None));
         Assert.Equal("Company not found", exception.Message);
     }
 
@@ -88,13 +88,13 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         var result = await _repository.AddAsync(company, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.NotNull(result.Id);
+        Assert.True(result.Id > 0);
         Assert.Equal(company.Cnpj, result.Cnpj);
         Assert.Equal(company.FantasyName, result.FantasyName);
         Assert.Equal(company.ZipCode, result.ZipCode);
         Assert.Equal(company.State, result.State);
-        Assert.NotNull(result.CreatedAt);
-        Assert.NotNull(result.UpdatedAt);
+        Assert.True(result.CreatedAt != DateTime.MinValue);
+        Assert.True(result.UpdatedAt != DateTime.MinValue);
     }
 
     [Fact]
@@ -123,7 +123,7 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         Assert.Equal(company.FantasyName, result.FantasyName);
         Assert.Equal(company.ZipCode, result.ZipCode);
         Assert.Equal(company.State, result.State);
-        Assert.NotNull(result.UpdatedAt);
+        Assert.True(result.UpdatedAt != DateTime.MinValue);
     }
 
     [Fact]
@@ -172,18 +172,14 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
                 Cnpj = "12345678000195",
                 FantasyName = "Company 1",
                 ZipCode = "12345678",
-                State = "SP",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                State = "SP"
             },
             new Company
             {
                 Cnpj = "98765432000123",
                 FantasyName = "Company 2",
                 ZipCode = "87654321",
-                State = "RJ",
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                State = "RJ"
             }
         };
 
@@ -249,5 +245,86 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
             _repository.DeleteAsync(nonExistentId, CancellationToken.None));
         
         Assert.Equal("Company not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task AddAsync_WithDuplicateCnpj_ShouldThrowException()
+    {
+        await CleanDatabaseAsync();
+        
+        var company1 = new Company
+        {
+            Cnpj = "12345678000195",
+            FantasyName = "Company 1",
+            ZipCode = "12345678",
+            State = "SP"
+        };
+
+        var company2 = new Company
+        {
+            Cnpj = "12345678000195",
+            FantasyName = "Company 2",
+            ZipCode = "87654321",
+            State = "RJ"
+        };
+
+        await _repository.AddAsync(company1, CancellationToken.None);
+
+        var exception = await Assert.ThrowsAsync<DbUpdateException>(() => 
+            _repository.AddAsync(company2, CancellationToken.None));
+        
+        Assert.Contains("duplicate key", exception.InnerException?.Message?.ToLower() ?? "");
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldIncludeCompanySuppliers_WhenCompaniesHaveSuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var supplier = new Supplier
+        {
+            Type = PersonType.Company,
+            Cnpj = "98765432000123",
+            Name = "Test Supplier",
+            Email = "supplier@test.com",
+            ZipCode = "87654321"
+        };
+        
+        _context.Suppliers.Add(supplier);
+        await _context.SaveChangesAsync();
+        
+        var company = new Company
+        {
+            Cnpj = "12345678000195",
+            FantasyName = "Test Company",
+            ZipCode = "12345678",
+            State = "SP"
+        };
+        
+        _context.Companies.Add(company);
+        await _context.SaveChangesAsync();
+        
+        var companySupplier = new CompanySupplier
+        {
+            CompanyId = company.Id,
+            SupplierId = supplier.Id
+        };
+        
+        _context.CompanySuppliers.Add(companySupplier);
+        await _context.SaveChangesAsync();
+        
+        var result = await _repository.GetAllAsync(CancellationToken.None);
+        
+        Assert.NotNull(result);
+        Assert.Single(result);
+        
+        var companyResult = result.First();
+        Assert.NotNull(companyResult.CompanySuppliers);
+        Assert.Single(companyResult.CompanySuppliers);
+        
+        var companySupplierResult = companyResult.CompanySuppliers.First();
+        Assert.NotNull(companySupplierResult.Supplier);
+        Assert.Equal(supplier.Id, companySupplierResult.Supplier.Id);
+        Assert.Equal(supplier.Cnpj, companySupplierResult.Supplier.Cnpj);
     }
 }
