@@ -12,6 +12,10 @@ public class CompanySupplierMapper : IEntityTypeConfiguration<CompanySupplier>
         builder.Property(cs => cs.Id).ValueGeneratedOnAdd();
         builder.Property(cs => cs.CompanyId).IsRequired();
         builder.Property(cs => cs.SupplierId).IsRequired();
+
+        builder.HasIndex(cs => new { cs.CompanyId, cs.SupplierId })
+               .IsUnique();
+
         
         builder.HasOne(cs => cs.Company)
             .WithMany(c => c.CompanySuppliers)

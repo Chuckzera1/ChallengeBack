@@ -57,14 +57,6 @@ public class Supplier
         UpdatedAt = DateTime.UtcNow;
     }
 
-    public void Update(string name, string email, string zipCode)
-    {
-        Name = name;
-        Email = email;
-        ZipCode = zipCode;
-        UpdatedAt = DateTime.UtcNow;
-    }
-
     public bool IsUnderage()
     {
         if (BirthDate == null) return false;

@@ -14,24 +14,32 @@ public class CompanyRepository : ICompanyRepository
         _context = context;
     }
 
-    public async Task<Company> GetByIdAsync(int id) => await _context.Companies.FindAsync(id) ?? throw new Exception("Company not found");
-    public async Task<IEnumerable<Company>> GetAllAsync() => await _context.Companies.ToListAsync();
+    public async Task<Company> GetByIdAsync(int id, CancellationToken ct) => 
+        await _context.Companies
+            .Include(c => c.CompanySuppliers)
+            .ThenInclude(cs => cs.Supplier)
+            .FirstOrDefaultAsync(c => c.Id == id, ct) ?? throw new Exception("Company not found");
+    public async Task<IEnumerable<Company>> GetAllAsync(CancellationToken ct) => 
+        await _context.Companies
+            .Include(c => c.CompanySuppliers)
+            .ThenInclude(cs => cs.Supplier)
+            .ToListAsync(ct);
     public async Task<Company> AddAsync(Company company, CancellationToken ct)
     {
-        await _context.Companies.AddAsync(company);
+        _context.Companies.Add(company);
         await _context.SaveChangesAsync(ct);
         return company;
     }
-    public async Task<Company> UpdateAsync(Company company)
+    public async Task<Company> UpdateAsync(Company company, CancellationToken ct)
     {
         _context.Companies.Update(company);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
         return company;
     }
-    public async Task DeleteAsync(int id)
+    public async Task DeleteAsync(int id, CancellationToken ct)
     {
-        var company = await GetByIdAsync(id);
+        var company = await GetByIdAsync(id, ct);
         _context.Companies.Remove(company);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(ct);
     }
 }

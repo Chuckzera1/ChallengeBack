@@ -6,3 +6,7 @@ public class CreateCompanyDto
     public string FantasyName { get; set; }
     public string ZipCode { get; set; }
 }
+
+public class UpdateCompanyDto {
+    public string FantasyName { get; set; }
+}
