@@ -4,9 +4,9 @@ namespace ChallengeBack.Application.Interfaces.Repositories;
 
 public interface ISupplierRepository
 {
-    Task<Supplier> GetByIdAsync(int id);
-    Task<IEnumerable<Supplier>> GetAllAsync();
-    Task<Supplier> AddAsync(Supplier supplier);
-    Task<Supplier> UpdateAsync(Supplier supplier);
-    Task<Supplier> DeleteAsync(int id);
+    Task<Supplier> GetByIdAsync(int id, CancellationToken ct);
+    Task<IEnumerable<Supplier>> GetAllAsync(CancellationToken ct);
+    Task<Supplier> AddAsync(Supplier supplier, CancellationToken ct);
+    Task<Supplier> UpdateAsync(Supplier supplier, CancellationToken ct);
+    Task<Supplier> DeleteAsync(int id, CancellationToken ct);
 }

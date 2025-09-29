@@ -11,10 +11,11 @@ public class CompanyMapper : IEntityTypeConfiguration<Company>
         builder.ToTable("Companies").HasKey(c => c.Id);
         builder.Property(c => c.Id).ValueGeneratedOnAdd();
         builder.Property(c => c.Cnpj).IsRequired().HasMaxLength(14);
+        builder.HasIndex(c => c.Cnpj).IsUnique();
         builder.Property(c => c.FantasyName).IsRequired().HasMaxLength(100);
         builder.Property(c => c.ZipCode).IsRequired().HasMaxLength(8);
         builder.Property(c => c.State).IsRequired();
-        builder.Property(c => c.CreatedAt).IsRequired();
-        builder.Property(c => c.UpdatedAt).IsRequired();
+        builder.Property(c => c.CreatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAdd();
+        builder.Property(c => c.UpdatedAt).IsRequired().HasDefaultValueSql("CURRENT_TIMESTAMP").ValueGeneratedOnAddOrUpdate();
     }
 }

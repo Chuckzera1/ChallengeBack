@@ -7,6 +7,6 @@ public class CreateCompanyDto
     public string ZipCode { get; set; }
 }
 
-public class UpdateCompanyDto : CreateCompanyDto {
-    public int Id { get; set; }
+public class UpdateCompanyDto {
+    public string FantasyName { get; set; }
 }
