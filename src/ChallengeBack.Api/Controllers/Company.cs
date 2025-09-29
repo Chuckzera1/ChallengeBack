@@ -1,4 +1,5 @@
 using AutoMapper;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Dto.Company;
 using ChallengeBack.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -47,12 +48,18 @@ public class CreateCompanyController : ControllerBase {
     }
     
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<CompanyListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResultDto<CompanyListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetAll(CancellationToken ct)
+    public async Task<IActionResult> GetAll([FromQuery] GetAllCompanyFilterDto filter, CancellationToken ct)
     {
-        var companies = await _getAllCompaniesService.Execute(ct);
-        var response = _mapper.Map<IEnumerable<CompanyListDto>>(companies);
+        var result = await _getAllCompaniesService.Execute(filter, ct);
+        var response = new PagedResultDto<CompanyListDto>
+        {
+            Data = _mapper.Map<IEnumerable<CompanyListDto>>(result.Data),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            Limit = result.Limit
+        };
         return Ok(response);
     }
 

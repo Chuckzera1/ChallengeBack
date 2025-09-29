@@ -1,3 +1,5 @@
+using ChallengeBack.Application.Dto.Company;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Domain.Enums;
 using ChallengeBack.Infrastructure.Data;
@@ -150,18 +152,22 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnEmpty_WhenNoCompaniesExist()
+    public async Task GetAllWithFilterAsync_ShouldReturnEmpty_WhenNoCompaniesExist()
     {
         await CleanDatabaseAsync();
         
-        var result = await _repository.GetAllAsync(CancellationToken.None);
+        var filter = new GetAllCompanyFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Empty(result);
+        Assert.Empty(result.Data);
+        Assert.Equal(0, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnAllCompanies_WhenCompaniesExist()
+    public async Task GetAllWithFilterAsync_ShouldReturnAllCompanies_WhenCompaniesExist()
     {
         await CleanDatabaseAsync();
         
@@ -186,12 +192,16 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         _context.Companies.AddRange(companies);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetAllAsync(CancellationToken.None);
+        var filter = new GetAllCompanyFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count());
-        Assert.Contains(result, c => c.Cnpj == "12345678000195");
-        Assert.Contains(result, c => c.Cnpj == "98765432000123");
+        Assert.Equal(2, result.Data.Count());
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+        Assert.Contains(result.Data, c => c.Cnpj == "12345678000195");
+        Assert.Contains(result.Data, c => c.Cnpj == "98765432000123");
     }
 
     [Fact]
@@ -277,7 +287,7 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldIncludeCompanySuppliers_WhenCompaniesHaveSuppliers()
+    public async Task GetAllWithFilterAsync_ShouldIncludeCompanySuppliers_WhenCompaniesHaveSuppliers()
     {
         await CleanDatabaseAsync();
         
@@ -313,12 +323,13 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         _context.CompanySuppliers.Add(companySupplier);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetAllAsync(CancellationToken.None);
+        var filter = new GetAllCompanyFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
         
         Assert.NotNull(result);
-        Assert.Single(result);
+        Assert.Single(result.Data);
         
-        var companyResult = result.First();
+        var companyResult = result.Data.First();
         Assert.NotNull(companyResult.CompanySuppliers);
         Assert.Single(companyResult.CompanySuppliers);
         
@@ -326,5 +337,116 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         Assert.NotNull(companySupplierResult.Supplier);
         Assert.Equal(supplier.Id, companySupplierResult.Supplier.Id);
         Assert.Equal(supplier.Cnpj, companySupplierResult.Supplier.Cnpj);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithPagination_ShouldReturnCorrectPage()
+    {
+        await CleanDatabaseAsync();
+        
+        var companies = new List<Company>();
+        for (int i = 1; i <= 15; i++)
+        {
+            companies.Add(new Company
+            {
+                Cnpj = $"{i:D14}0001{i:D2}",
+                FantasyName = $"Company {i}",
+                ZipCode = $"{i:D8}",
+                State = "SP"
+            });
+        }
+
+        _context.Companies.AddRange(companies);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanyFilterDto { Page = 2, Limit = 5 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(5, result.Data.Count());
+        Assert.Equal(15, result.TotalCount);
+        Assert.Equal(2, result.Page);
+        Assert.Equal(5, result.Limit);
+        Assert.Equal(3, result.TotalPages);
+        Assert.True(result.HasNextPage);
+        Assert.True(result.HasPreviousPage);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithNameFilter_ShouldReturnFilteredCompanies()
+    {
+        await CleanDatabaseAsync();
+        
+        var companies = new List<Company>
+        {
+            new Company
+            {
+                Cnpj = "12345678000195",
+                FantasyName = "Tech Company",
+                ZipCode = "12345678",
+                State = "SP"
+            },
+            new Company
+            {
+                Cnpj = "98765432000123",
+                FantasyName = "Business Corp",
+                ZipCode = "87654321",
+                State = "RJ"
+            },
+            new Company
+            {
+                Cnpj = "11111111000111",
+                FantasyName = "Tech Solutions",
+                ZipCode = "11111111",
+                State = "MG"
+            }
+        };
+
+        _context.Companies.AddRange(companies);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanyFilterDto { Name = "Tech", Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Data.Count());
+        Assert.Equal(2, result.TotalCount);
+        Assert.Contains(result.Data, c => c.FantasyName == "Tech Company");
+        Assert.Contains(result.Data, c => c.FantasyName == "Tech Solutions");
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithCnpjFilter_ShouldReturnFilteredCompanies()
+    {
+        await CleanDatabaseAsync();
+        
+        var companies = new List<Company>
+        {
+            new Company
+            {
+                Cnpj = "12345678000195",
+                FantasyName = "Company 1",
+                ZipCode = "12345678",
+                State = "SP"
+            },
+            new Company
+            {
+                Cnpj = "98765432000123",
+                FantasyName = "Company 2",
+                ZipCode = "87654321",
+                State = "RJ"
+            }
+        };
+
+        _context.Companies.AddRange(companies);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllCompanyFilterDto { Cnpj = "123456", Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal("12345678000195", result.Data.First().Cnpj);
     }
 }

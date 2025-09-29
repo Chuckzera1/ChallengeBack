@@ -1,4 +1,5 @@
 using AutoMapper;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Dto.Company;
 using ChallengeBack.Application.Dto.Supplier;
 using ChallengeBack.Application.Interfaces.Services;
@@ -40,12 +41,18 @@ public class CreateSupplierController : ControllerBase {
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<SupplierListDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(PagedResultDto<SupplierListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllSupplierFilterDto filter, CancellationToken ct)
     {
-        var suppliers = await _getAllSuppliersWithFilterService.Execute(filter, ct);
-        var response = _mapper.Map<IEnumerable<SupplierListDto>>(suppliers);
+        var result = await _getAllSuppliersWithFilterService.Execute(filter, ct);
+        var response = new PagedResultDto<SupplierListDto>
+        {
+            Data = _mapper.Map<IEnumerable<SupplierListDto>>(result.Data),
+            TotalCount = result.TotalCount,
+            Page = result.Page,
+            Limit = result.Limit
+        };
         return Ok(response);
     }
 

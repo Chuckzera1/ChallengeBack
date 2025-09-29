@@ -1,4 +1,5 @@
 using ChallengeBack.Application.Dto.Supplier;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Infrastructure.Data;
@@ -20,7 +21,7 @@ public class SupplierRepository : ISupplierRepository {
             .ThenInclude(cs => cs.Company)
             .FirstOrDefaultAsync(s => s.Id == id, ct) ?? throw new Exception("Supplier not found");
     
-    public async Task<IEnumerable<Supplier>> GetAllWithFilterAsync(GetAllSupplierFilterDto filter, CancellationToken ct)
+    public async Task<PagedResultDto<Supplier>> GetAllWithFilterAsync(GetAllSupplierFilterDto filter, CancellationToken ct)
     {
         var query = _context.Suppliers
             .Include(s => s.CompanySuppliers)
@@ -42,7 +43,20 @@ public class SupplierRepository : ISupplierRepository {
             query = query.Where(s => s.Cnpj != null && s.Cnpj.Contains(filter.Cnpj));
         }
 
-        return await query.ToListAsync(ct);
+        var totalCount = await query.CountAsync(ct);
+        
+        var suppliers = await query
+            .Skip(filter.Skip)
+            .Take(filter.Limit)
+            .ToListAsync(ct);
+
+        return new PagedResultDto<Supplier>
+        {
+            Data = suppliers,
+            TotalCount = totalCount,
+            Page = filter.Page,
+            Limit = filter.Limit
+        };
     }
     public async Task<Supplier> AddAsync(Supplier supplier, CancellationToken ct) {
          _context.Suppliers.Add(supplier);
