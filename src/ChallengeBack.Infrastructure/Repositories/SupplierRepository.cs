@@ -14,11 +14,18 @@ public class SupplierRepository : ISupplierRepository {
         _context = context;
     }
 
-    public async Task<Supplier> GetByIdAsync(int id, CancellationToken ct) => await _context.Suppliers.FindAsync(id, ct) ?? throw new Exception("Supplier not found");
+    public async Task<Supplier> GetByIdAsync(int id, CancellationToken ct) => 
+        await _context.Suppliers
+            .Include(s => s.CompanySuppliers)
+            .ThenInclude(cs => cs.Company)
+            .FirstOrDefaultAsync(s => s.Id == id, ct) ?? throw new Exception("Supplier not found");
     
     public async Task<IEnumerable<Supplier>> GetAllWithFilterAsync(GetAllSupplierFilterDto filter, CancellationToken ct)
     {
-        var query = _context.Suppliers.AsQueryable();
+        var query = _context.Suppliers
+            .Include(s => s.CompanySuppliers)
+            .ThenInclude(cs => cs.Company)
+            .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filter.Name))
         {

@@ -21,6 +21,7 @@ public class CompanyRepository : ICompanyRepository
             .FirstOrDefaultAsync(c => c.Id == id, ct) ?? throw new Exception("Company not found");
     public async Task<IEnumerable<Company>> GetAllAsync(CancellationToken ct) => 
         await _context.Companies
+            .AsNoTracking()
             .Include(c => c.CompanySuppliers)
             .ThenInclude(cs => cs.Supplier)
             .ToListAsync(ct);

@@ -59,6 +59,7 @@ public class Supplier
 
     public bool IsUnderage()
     {
+        if (Type != PersonType.Individual) return false;
         if (BirthDate == null) return false;
         
         var age = DateTime.Today.Year - BirthDate.Value.Year;

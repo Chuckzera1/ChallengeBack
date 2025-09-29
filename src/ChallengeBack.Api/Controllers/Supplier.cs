@@ -1,3 +1,5 @@
+using AutoMapper;
+using ChallengeBack.Application.Dto.Company;
 using ChallengeBack.Application.Dto.Supplier;
 using ChallengeBack.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -11,43 +13,50 @@ public class CreateSupplierController : ControllerBase {
     private readonly IGetAllSuppliersWithFilterService _getAllSuppliersWithFilterService;
     private readonly IUpdateSupplierService _updateSupplierService;
     private readonly IDeleteSupplierService _deleteSupplierService;
+    private readonly IMapper _mapper;
+    
     public CreateSupplierController(
         ICreateSupplierService createSupplierService,
         IGetAllSuppliersWithFilterService getAllSuppliersWithFilterService,
         IUpdateSupplierService updateSupplierService,
-        IDeleteSupplierService deleteSupplierService)
+        IDeleteSupplierService deleteSupplierService,
+        IMapper mapper)
     {
         _createSupplierService = createSupplierService;
         _getAllSuppliersWithFilterService = getAllSuppliersWithFilterService;
         _updateSupplierService = updateSupplierService;
         _deleteSupplierService = deleteSupplierService;
+        _mapper = mapper;
     }
 
     [HttpPost]
-    [ProducesResponseType(typeof(Domain.Entities.Supplier), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(SupplierResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateSupplierDto createSupplierDto, CancellationToken ct)
     {
         var supplier = await _createSupplierService.Execute(createSupplierDto, ct);
-        return Ok(supplier);
+        var response = _mapper.Map<SupplierResponseDto>(supplier);
+        return Ok(response);
     }
 
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<Domain.Entities.Supplier>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<SupplierListDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetAll([FromQuery] GetAllSupplierFilterDto filter, CancellationToken ct)
     {
         var suppliers = await _getAllSuppliersWithFilterService.Execute(filter, ct);
-        return Ok(suppliers);
+        var response = _mapper.Map<IEnumerable<SupplierListDto>>(suppliers);
+        return Ok(response);
     }
 
     [HttpPut("{id}")]
-    [ProducesResponseType(typeof(Domain.Entities.Supplier), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SupplierResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierDto updateSupplierDto, CancellationToken ct)
     {
         var supplier = await _updateSupplierService.Execute(id, updateSupplierDto, ct);
-        return Ok(supplier);
+        var response = _mapper.Map<SupplierResponseDto>(supplier);
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]

@@ -12,9 +12,7 @@ public static class InfrastructureExtensions
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<ICepRepository, CepRepository>();
         services.AddScoped<ISupplierRepository, SupplierRepository>();
-        // TODO: Implement missing repositories when they are created
-        // services.AddScoped<ISupplierRepository, SupplierRepository>();
-        // services.AddScoped<ICompanySupplierRepository, CompanySupplierRepository>();
+        services.AddScoped<ICompanySupplierRepository, CompanySupplierRepository>();
 
         return services;
     }

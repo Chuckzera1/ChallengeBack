@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ChallengeBack.Infrastructure.Data;
 using ChallengeBack.Api.Extensions;
+using ChallengeBack.Application.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.HandleDependencyInjection();
 builder.Services.AddHttpClient();
+
+// Add AutoMapper
+builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
 var app = builder.Build();
 
