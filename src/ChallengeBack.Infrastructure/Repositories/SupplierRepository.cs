@@ -1,3 +1,4 @@
+using ChallengeBack.Application.Dto.Supplier;
 using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Infrastructure.Data;
@@ -14,7 +15,28 @@ public class SupplierRepository : ISupplierRepository {
     }
 
     public async Task<Supplier> GetByIdAsync(int id, CancellationToken ct) => await _context.Suppliers.FindAsync(id, ct) ?? throw new Exception("Supplier not found");
-    public async Task<IEnumerable<Supplier>> GetAllAsync(CancellationToken ct) => await _context.Suppliers.ToListAsync(ct);
+    
+    public async Task<IEnumerable<Supplier>> GetAllWithFilterAsync(GetAllSupplierFilterDto filter, CancellationToken ct)
+    {
+        var query = _context.Suppliers.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(filter.Name))
+        {
+            query = query.Where(s => s.Name.Contains(filter.Name));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Cpf))
+        {
+            query = query.Where(s => s.Cpf != null && s.Cpf.Contains(filter.Cpf));
+        }
+
+        if (!string.IsNullOrWhiteSpace(filter.Cnpj))
+        {
+            query = query.Where(s => s.Cnpj != null && s.Cnpj.Contains(filter.Cnpj));
+        }
+
+        return await query.ToListAsync(ct);
+    }
     public async Task<Supplier> AddAsync(Supplier supplier, CancellationToken ct) {
          _context.Suppliers.Add(supplier);
          await _context.SaveChangesAsync(ct);

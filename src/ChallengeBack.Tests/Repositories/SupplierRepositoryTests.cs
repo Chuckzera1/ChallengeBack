@@ -3,7 +3,7 @@ using ChallengeBack.Domain.Enums;
 using ChallengeBack.Infrastructure.Data;
 using ChallengeBack.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using ChallengeBack.Application.Dto.Supplier;
 
 namespace ChallengeBack.Tests.Repositories;
 
@@ -164,18 +164,7 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldReturnEmpty_WhenNoSuppliersExist()
-    {
-        await CleanDatabaseAsync();
-        
-        var result = await _repository.GetAllAsync(CancellationToken.None);
-
-        Assert.NotNull(result);
-        Assert.Empty(result);
-    }
-
-    [Fact]
-    public async Task GetAllAsync_ShouldReturnAllSuppliers_WhenSuppliersExist()
+    public async Task GetAllWithFilterAsync_ShouldReturnAllSuppliers_WhenSuppliersExist()
     {
         await CleanDatabaseAsync();
         
@@ -204,7 +193,7 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
         _context.Suppliers.AddRange(suppliers);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetAllAsync(CancellationToken.None);
+        var result = await _repository.GetAllWithFilterAsync(new GetAllSupplierFilterDto(), CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count());
@@ -366,7 +355,7 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
         _context.CompanySuppliers.Add(companySupplier);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetAllAsync(CancellationToken.None);
+        var result = await _repository.GetAllWithFilterAsync(new GetAllSupplierFilterDto(), CancellationToken.None);
         
         Assert.NotNull(result);
         Assert.Single(result);

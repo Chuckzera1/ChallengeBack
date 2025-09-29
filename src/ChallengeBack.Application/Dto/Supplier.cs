@@ -12,3 +12,10 @@ public class CreateSupplierDto {
     public string? Rg { get; set; }
     public DateTime? BirthDate { get; set; }
 }
+
+public class UpdateSupplierDto {
+    public string Name { get; set; }
+    public string Email { get; set; }
+    public string ZipCode { get; set; }
+    public DateTime? BirthDate { get; set; }
+}
