@@ -9,6 +9,21 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Add Swagger services
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "ChallengeBack API",
+        Version = "v1",
+        Description = "API para gerenciamento de empresas e fornecedores",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "ChallengeBack Team"
+        }
+    });
+});
+
 // Add controllers
 builder.Services.AddControllers();
 
@@ -44,6 +59,12 @@ app.UseCors();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "ChallengeBack API v1");
+        c.RoutePrefix = "swagger";
+    });
 }
 
 app.MapControllers();
