@@ -1,4 +1,5 @@
 using ChallengeBack.Application.Dto.Supplier;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Domain.Entities;
 
 namespace ChallengeBack.Application.Interfaces.Services;
@@ -8,7 +9,7 @@ public interface ICreateSupplierService {
 }
 
 public interface IGetAllSuppliersWithFilterService {
-    Task<IEnumerable<Supplier>> Execute(GetAllSupplierFilterDto filter, CancellationToken ct);
+    Task<PagedResultDto<Supplier>> Execute(GetAllSupplierFilterDto filter, CancellationToken ct);
 }
 
 public interface IGetSupplierByIdService {

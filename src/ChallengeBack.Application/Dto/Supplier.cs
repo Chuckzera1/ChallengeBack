@@ -19,3 +19,4 @@ public class UpdateSupplierDto {
     public string ZipCode { get; set; }
     public DateTime? BirthDate { get; set; }
 }
+

@@ -1,3 +1,5 @@
+using ChallengeBack.Application.Dto.Company;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Application.Interfaces.Services;
 using ChallengeBack.Domain.Entities;
@@ -12,7 +14,7 @@ public class GetAllCompaniesService : IGetAllCompaniesService {
         _companyRepository = companyRepository;
     }
 
-    public async Task<IEnumerable<CompanyEntity>> Execute(CancellationToken ct) {
-        return await _companyRepository.GetAllAsync(ct);
+    public async Task<PagedResultDto<CompanyEntity>> Execute(GetAllCompanyFilterDto filter, CancellationToken ct) {
+        return await _companyRepository.GetAllWithFilterAsync(filter, ct);
     }
 }

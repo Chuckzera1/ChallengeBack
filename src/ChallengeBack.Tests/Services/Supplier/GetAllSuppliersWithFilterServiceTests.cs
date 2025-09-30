@@ -1,4 +1,5 @@
 using ChallengeBack.Application.Dto.Supplier;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Application.Services.Supplier;
 using SupplierEntity = ChallengeBack.Domain.Entities.Supplier;
@@ -23,7 +24,9 @@ public class GetAllSuppliersWithFilterServiceTests
     {
         var filter = new GetAllSupplierFilterDto
         {
-            Name = "John"
+            Name = "John",
+            Page = 1,
+            Limit = 10
         };
 
         var expectedSuppliers = new List<SupplierEntity>
@@ -38,15 +41,26 @@ public class GetAllSuppliersWithFilterServiceTests
             }
         };
 
+        var expectedResult = new PagedResultDto<SupplierEntity>
+        {
+            Data = expectedSuppliers,
+            TotalCount = 1,
+            Page = 1,
+            Limit = 10
+        };
+
         _supplierRepositoryMock
             .Setup(x => x.GetAllWithFilterAsync(filter, CancellationToken.None))
-            .ReturnsAsync(expectedSuppliers);
+            .ReturnsAsync(expectedResult);
 
         var result = await _service.Execute(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Single(result);
-        Assert.Equal("John Doe", result.First().Name);
+        Assert.Single(result.Data);
+        Assert.Equal("John Doe", result.Data.First().Name);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
 
         _supplierRepositoryMock.Verify(x => x.GetAllWithFilterAsync(filter, CancellationToken.None), Times.Once);
     }
@@ -56,7 +70,9 @@ public class GetAllSuppliersWithFilterServiceTests
     {
         var filter = new GetAllSupplierFilterDto
         {
-            Cpf = "123456"
+            Cpf = "123456",
+            Page = 1,
+            Limit = 10
         };
 
         var expectedSuppliers = new List<SupplierEntity>
@@ -71,15 +87,24 @@ public class GetAllSuppliersWithFilterServiceTests
             }
         };
 
+        var expectedResult = new PagedResultDto<SupplierEntity>
+        {
+            Data = expectedSuppliers,
+            TotalCount = 1,
+            Page = 1,
+            Limit = 10
+        };
+
         _supplierRepositoryMock
             .Setup(x => x.GetAllWithFilterAsync(filter, CancellationToken.None))
-            .ReturnsAsync(expectedSuppliers);
+            .ReturnsAsync(expectedResult);
 
         var result = await _service.Execute(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Single(result);
-        Assert.Equal("12345678901", result.First().Cpf);
+        Assert.Single(result.Data);
+        Assert.Equal("12345678901", result.Data.First().Cpf);
+        Assert.Equal(1, result.TotalCount);
 
         _supplierRepositoryMock.Verify(x => x.GetAllWithFilterAsync(filter, CancellationToken.None), Times.Once);
     }
@@ -89,7 +114,9 @@ public class GetAllSuppliersWithFilterServiceTests
     {
         var filter = new GetAllSupplierFilterDto
         {
-            Cnpj = "12345678"
+            Cnpj = "12345678",
+            Page = 1,
+            Limit = 10
         };
 
         var expectedSuppliers = new List<SupplierEntity>
@@ -104,15 +131,24 @@ public class GetAllSuppliersWithFilterServiceTests
             }
         };
 
+        var expectedResult = new PagedResultDto<SupplierEntity>
+        {
+            Data = expectedSuppliers,
+            TotalCount = 1,
+            Page = 1,
+            Limit = 10
+        };
+
         _supplierRepositoryMock
             .Setup(x => x.GetAllWithFilterAsync(filter, CancellationToken.None))
-            .ReturnsAsync(expectedSuppliers);
+            .ReturnsAsync(expectedResult);
 
         var result = await _service.Execute(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Single(result);
-        Assert.Equal("12345678000195", result.First().Cnpj);
+        Assert.Single(result.Data);
+        Assert.Equal("12345678000195", result.Data.First().Cnpj);
+        Assert.Equal(1, result.TotalCount);
 
         _supplierRepositoryMock.Verify(x => x.GetAllWithFilterAsync(filter, CancellationToken.None), Times.Once);
     }
@@ -120,7 +156,7 @@ public class GetAllSuppliersWithFilterServiceTests
     [Fact]
     public async Task Execute_WhenNoFilters_ShouldReturnAllSuppliers()
     {
-        var filter = new GetAllSupplierFilterDto();
+        var filter = new GetAllSupplierFilterDto { Page = 1, Limit = 10 };
 
         var expectedSuppliers = new List<SupplierEntity>
         {
@@ -142,14 +178,25 @@ public class GetAllSuppliersWithFilterServiceTests
             }
         };
 
+        var expectedResult = new PagedResultDto<SupplierEntity>
+        {
+            Data = expectedSuppliers,
+            TotalCount = 2,
+            Page = 1,
+            Limit = 10
+        };
+
         _supplierRepositoryMock
             .Setup(x => x.GetAllWithFilterAsync(filter, CancellationToken.None))
-            .ReturnsAsync(expectedSuppliers);
+            .ReturnsAsync(expectedResult);
 
         var result = await _service.Execute(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count());
+        Assert.Equal(2, result.Data.Count());
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
 
         _supplierRepositoryMock.Verify(x => x.GetAllWithFilterAsync(filter, CancellationToken.None), Times.Once);
     }

@@ -1,4 +1,5 @@
 using ChallengeBack.Application.Dto.Supplier;
+using ChallengeBack.Application.Dto.Base;
 using ChallengeBack.Application.Interfaces.Repositories;
 using ChallengeBack.Application.Interfaces.Services;
 using SupplierEntity = ChallengeBack.Domain.Entities.Supplier;
@@ -14,7 +15,7 @@ public class GetAllSuppliersWithFilterService : IGetAllSuppliersWithFilterServic
         _supplierRepository = supplierRepository;
     }
 
-    public async Task<IEnumerable<SupplierEntity>> Execute(GetAllSupplierFilterDto filter, CancellationToken ct)
+    public async Task<PagedResultDto<SupplierEntity>> Execute(GetAllSupplierFilterDto filter, CancellationToken ct)
     {
         return await _supplierRepository.GetAllWithFilterAsync(filter, ct);
     }

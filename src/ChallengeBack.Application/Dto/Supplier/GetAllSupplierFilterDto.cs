@@ -1,6 +1,8 @@
+using ChallengeBack.Application.Dto.Base;
+
 namespace ChallengeBack.Application.Dto.Supplier;
 
-public class GetAllSupplierFilterDto
+public class GetAllSupplierFilterDto : PaginationDto
 {
     public string? Name { get; set; }
     public string? Cpf { get; set; }

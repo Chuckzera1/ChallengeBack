@@ -1,5 +1,7 @@
+using ChallengeBack.Application.Dto.CompanySupplier;
 using ChallengeBack.Application.Interfaces.Services;
 using ChallengeBack.Application.Services.Company;
+using ChallengeBack.Application.Services.CompanySupplier;
 using ChallengeBack.Application.Services.Supplier;
 
 namespace ChallengeBack.Api.Extensions;
@@ -19,6 +21,13 @@ public static class ApplicationExtensions
         // Supplier
         services.AddScoped<ICreateSupplierService, CreateSupplierService>();
         services.AddScoped<IGetAllSuppliersWithFilterService, GetAllSuppliersWithFilterService>();
+        services.AddScoped<IUpdateSupplierService, UpdateSupplierService>();
+        services.AddScoped<IDeleteSupplierService, DeleteSupplierService>();
+
+        // CompanySupplier
+        services.AddScoped<IAddCompanySupplierService, CreateCompanySupplierService>();
+        services.AddScoped<IDeleteCompanySupplierService, DeleteCompanySupplierService>();
+        services.AddScoped<IGetAllCompanySuppliersService, GetAllCompanySuppliersService>();
 
         return services;
     }

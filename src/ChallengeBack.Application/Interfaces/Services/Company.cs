@@ -1,5 +1,6 @@
 using ChallengeBack.Domain.Entities;
 using ChallengeBack.Application.Dto.Company;
+using ChallengeBack.Application.Dto.Base;
 
 namespace ChallengeBack.Application.Interfaces.Services;
 
@@ -15,7 +16,7 @@ public interface IDeleteCompanyService
 
 public interface IGetAllCompaniesService
 {
-    Task<IEnumerable<Company>> Execute(CancellationToken ct);
+    Task<PagedResultDto<Company>> Execute(GetAllCompanyFilterDto filter, CancellationToken ct);
 }
 
 public interface IUpdateCompanyService 

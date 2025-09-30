@@ -27,7 +27,7 @@ public class CreateSupplierService : ICreateSupplierService {
             Cpf = createSupplierDto.Cpf,
             Cnpj = createSupplierDto.Cnpj,
             Rg = createSupplierDto.Rg,
-            BirthDate = createSupplierDto.BirthDate,
+            BirthDate = createSupplierDto.BirthDate?.ToUniversalTime(),
         };
 
         return await _supplierRepository.AddAsync(supplier, ct);

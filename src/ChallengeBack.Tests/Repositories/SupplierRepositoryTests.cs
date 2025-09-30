@@ -193,12 +193,16 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
         _context.Suppliers.AddRange(suppliers);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetAllWithFilterAsync(new GetAllSupplierFilterDto(), CancellationToken.None);
+        var filter = new GetAllSupplierFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
 
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count());
-        Assert.Contains(result, s => s.Cnpj == "12345678000195");
-        Assert.Contains(result, s => s.Cpf == "98765432100");
+        Assert.Equal(2, result.Data.Count());
+        Assert.Equal(2, result.TotalCount);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(10, result.Limit);
+        Assert.Contains(result.Data, s => s.Cnpj == "12345678000195");
+        Assert.Contains(result.Data, s => s.Cpf == "98765432100");
     }
 
     [Fact]
@@ -355,12 +359,13 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
         _context.CompanySuppliers.Add(companySupplier);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetAllWithFilterAsync(new GetAllSupplierFilterDto(), CancellationToken.None);
+        var filter = new GetAllSupplierFilterDto { Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
         
         Assert.NotNull(result);
-        Assert.Single(result);
+        Assert.Single(result.Data);
         
-        var supplierResult = result.First();
+        var supplierResult = result.Data.First();
         Assert.NotNull(supplierResult.CompanySuppliers);
         Assert.Single(supplierResult.CompanySuppliers);
         
@@ -422,5 +427,159 @@ public class SupplierRepositoryTests : IClassFixture<PostgresFixture>
         Assert.Null(result.BirthDate);
         Assert.Equal("Test Company Supplier", result.Name);
         Assert.Equal("company@test.com", result.Email);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithPagination_ShouldReturnCorrectPage()
+    {
+        await CleanDatabaseAsync();
+        
+        var suppliers = new List<Supplier>();
+        for (int i = 1; i <= 15; i++)
+        {
+            suppliers.Add(new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = $"{i:D11}",
+                Name = $"Supplier {i}",
+                Email = $"supplier{i}@test.com",
+                ZipCode = $"{i:D8}"
+            });
+        }
+
+        _context.Suppliers.AddRange(suppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllSupplierFilterDto { Page = 2, Limit = 5 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(5, result.Data.Count());
+        Assert.Equal(15, result.TotalCount);
+        Assert.Equal(2, result.Page);
+        Assert.Equal(5, result.Limit);
+        Assert.Equal(3, result.TotalPages);
+        Assert.True(result.HasNextPage);
+        Assert.True(result.HasPreviousPage);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithNameFilter_ShouldReturnFilteredSuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var suppliers = new List<Supplier>
+        {
+            new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = "12345678901",
+                Name = "John Doe",
+                Email = "john@test.com",
+                ZipCode = "12345678"
+            },
+            new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = "98765432100",
+                Name = "Jane Smith",
+                Email = "jane@test.com",
+                ZipCode = "87654321"
+            },
+            new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = "11111111111",
+                Name = "Johnny Walker",
+                Email = "johnny@test.com",
+                ZipCode = "11111111"
+            }
+        };
+
+        _context.Suppliers.AddRange(suppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllSupplierFilterDto { Name = "John", Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Data.Count());
+        Assert.Equal(2, result.TotalCount);
+        Assert.Contains(result.Data, s => s.Name == "John Doe");
+        Assert.Contains(result.Data, s => s.Name == "Johnny Walker");
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithCpfFilter_ShouldReturnFilteredSuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var suppliers = new List<Supplier>
+        {
+            new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = "12345678901",
+                Name = "Supplier 1",
+                Email = "supplier1@test.com",
+                ZipCode = "12345678"
+            },
+            new Supplier
+            {
+                Type = PersonType.Individual,
+                Cpf = "98765432100",
+                Name = "Supplier 2",
+                Email = "supplier2@test.com",
+                ZipCode = "87654321"
+            }
+        };
+
+        _context.Suppliers.AddRange(suppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllSupplierFilterDto { Cpf = "123456", Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal("12345678901", result.Data.First().Cpf);
+    }
+
+    [Fact]
+    public async Task GetAllWithFilterAsync_WithCnpjFilter_ShouldReturnFilteredSuppliers()
+    {
+        await CleanDatabaseAsync();
+        
+        var suppliers = new List<Supplier>
+        {
+            new Supplier
+            {
+                Type = PersonType.Company,
+                Cnpj = "12345678000195",
+                Name = "Company Supplier 1",
+                Email = "company1@test.com",
+                ZipCode = "12345678"
+            },
+            new Supplier
+            {
+                Type = PersonType.Company,
+                Cnpj = "98765432000123",
+                Name = "Company Supplier 2",
+                Email = "company2@test.com",
+                ZipCode = "87654321"
+            }
+        };
+
+        _context.Suppliers.AddRange(suppliers);
+        await _context.SaveChangesAsync();
+
+        var filter = new GetAllSupplierFilterDto { Cnpj = "123456", Page = 1, Limit = 10 };
+        var result = await _repository.GetAllWithFilterAsync(filter, CancellationToken.None);
+
+        Assert.NotNull(result);
+        Assert.Single(result.Data);
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal("12345678000195", result.Data.First().Cnpj);
     }
 }
