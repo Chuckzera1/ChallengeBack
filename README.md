@@ -191,13 +191,13 @@ dotnet test
 - ✅ Integração com API de CEP
 - ✅ Paginação e filtros nas listagens
 - ✅ Testes
-- ✅ Documentação automática da API (OpenAPI)
+- ✅ Documentação automática da API (OpenAPI + Swagger UI)
 
 ## 📚 Documentação da API
 
 Quando a API estiver rodando, acesse:
-- **OpenAPI JSON**: http://localhost:8080/openapi/v1.json (em desenvolvimento)
-- **Nota**: O projeto usa OpenAPI básico, mas não tem Swagger UI configurado
+- **Swagger UI**: http://localhost:{PORT}/swagger (interface interativa)
+- **OpenAPI JSON**: http://localhost:{PORT}/swagger/v1/swagger.json
 
 ## 🤝 Contribuição
 

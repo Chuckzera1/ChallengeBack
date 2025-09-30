@@ -9,10 +9,10 @@ public class CompanyListDto
     public string State { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public List<CompanySupplierListDto> CompanySuppliers { get; set; } = new();
+    public List<CompanySupplierBasicDto> CompanySuppliers { get; set; } = new();
 }
 
-public class CompanySupplierListDto
+public class CompanySupplierBasicDto
 {
     public int Id { get; set; }
     public int CompanyId { get; set; }
