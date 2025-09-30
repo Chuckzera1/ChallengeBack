@@ -1,9 +1,5 @@
 # ChallengeBack - API Backend
 
-## 📋 Sobre o Projeto
-
-O ChallengeBack é uma API REST desenvolvida em .NET 9 que gerencia empresas, fornecedores e suas relações. O projeto implementa uma arquitetura limpa (Clean Architecture) com separação clara de responsabilidades entre as camadas.
-
 ## 🛠️ Tecnologias Utilizadas
 
 ### Core Framework
@@ -26,6 +22,9 @@ O ChallengeBack é uma API REST desenvolvida em .NET 9 que gerencia empresas, fo
 ### DevOps
 - **Docker** - Containerização da aplicação
 - **Docker Compose** - Orquestração de serviços
+
+### Documentação
+- **Swagger** - Documentação da API
 
 ## 🏗️ Arquitetura do Projeto
 
@@ -83,6 +82,9 @@ src/
 - **CompanyId**: ID da empresa
 - **SupplierId**: ID do fornecedor
 - **Company/Supplier**: Propriedades de navegação
+
+### 📋 Diagrama do Banco de Dados
+[Diagrama do Banco de Dados](https://dbdiagram.io/d/68d6b0e9d2b621e422178511)
 
 ## 🚀 Endpoints da API
 
@@ -178,10 +180,6 @@ dotnet test
 - **Usuário**: postgres
 - **Senha**: postgres
 
-### API
-- **Porta**: 8080
-- **Ambiente**: Development (local) / Docker (container)
-
 ## 🔧 Funcionalidades
 
 - ✅ CRUD completo para Empresas
@@ -192,17 +190,3 @@ dotnet test
 - ✅ Paginação e filtros nas listagens
 - ✅ Testes
 - ✅ Documentação automática da API (OpenAPI + Swagger UI)
-
-## 📚 Documentação da API
-
-Quando a API estiver rodando, acesse:
-- **Swagger UI**: http://localhost:{PORT}/swagger (interface interativa)
-- **OpenAPI JSON**: http://localhost:{PORT}/swagger/v1/swagger.json
-
-## 🤝 Contribuição
-
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
