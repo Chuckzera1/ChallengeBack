@@ -42,6 +42,7 @@ public class CompanyRepository : ICompanyRepository
         var totalCount = await query.CountAsync(ct);
         
         var companies = await query
+            .OrderByDescending(c => c.CreatedAt)
             .Skip(filter.Skip)
             .Take(filter.Limit)
             .ToListAsync(ct);

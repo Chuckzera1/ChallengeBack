@@ -46,6 +46,7 @@ public class SupplierRepository : ISupplierRepository {
         var totalCount = await query.CountAsync(ct);
         
         var suppliers = await query
+            .OrderByDescending(c => c.CreatedAt)
             .Skip(filter.Skip)
             .Take(filter.Limit)
             .ToListAsync(ct);
