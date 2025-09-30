@@ -10,7 +10,7 @@ public class AddCompanySupplierDto {
 }
 
 public interface IDeleteCompanySupplierService {
-    Task Execute(int id, CancellationToken ct);
+    Task Execute(int companyId, int supplierId, CancellationToken ct);
 }
 
 public interface IAddCompanySupplierService {

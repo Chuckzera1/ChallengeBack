@@ -24,15 +24,15 @@ public class DeleteCompanySupplierServiceTests
         cancellationTokenSource.Cancel();
 
         _companySupplierRepositoryMock
-            .Setup(x => x.DeleteAsync(companySupplierId, cancellationTokenSource.Token))
+            .Setup(x => x.DeleteAsync(companySupplierId, companySupplierId, cancellationTokenSource.Token))
             .ThrowsAsync(new OperationCanceledException());
 
         
         await Assert.ThrowsAsync<OperationCanceledException>(() => 
-            _service.Execute(companySupplierId, cancellationTokenSource.Token));
+            _service.Execute(companySupplierId, companySupplierId, cancellationTokenSource.Token));
 
         _companySupplierRepositoryMock.Verify(
-            x => x.DeleteAsync(companySupplierId, cancellationTokenSource.Token), 
+            x => x.DeleteAsync(companySupplierId, companySupplierId, cancellationTokenSource.Token), 
             Times.Once);
     }
 
@@ -44,16 +44,16 @@ public class DeleteCompanySupplierServiceTests
         var expectedException = new ArgumentException("Invalid CompanySupplier ID");
 
         _companySupplierRepositoryMock
-            .Setup(x => x.DeleteAsync(companySupplierId, CancellationToken.None))
+            .Setup(x => x.DeleteAsync(companySupplierId, companySupplierId, CancellationToken.None))
             .ThrowsAsync(expectedException);
 
         
         var exception = await Assert.ThrowsAsync<ArgumentException>(() => 
-            _service.Execute(companySupplierId, CancellationToken.None));
+            _service.Execute(companySupplierId, companySupplierId, CancellationToken.None));
 
         Assert.Equal(expectedException.Message, exception.Message);
         _companySupplierRepositoryMock.Verify(
-            x => x.DeleteAsync(companySupplierId, CancellationToken.None), 
+            x => x.DeleteAsync(companySupplierId, companySupplierId, CancellationToken.None), 
             Times.Once);
     }
 }

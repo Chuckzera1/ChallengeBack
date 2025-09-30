@@ -10,7 +10,7 @@ public class DeleteCompanySupplierService : IDeleteCompanySupplierService {
         _companySupplierRepository = companySupplierRepository;
     }
 
-    public async Task Execute(int id, CancellationToken ct) {
-        await _companySupplierRepository.DeleteAsync(id, ct);
+    public async Task Execute(int companyId, int supplierId, CancellationToken ct) {
+        await _companySupplierRepository.DeleteAsync(companyId, supplierId, ct);
     }
 }

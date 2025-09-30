@@ -8,6 +8,6 @@ public interface ICompanySupplierRepository
 {
     Task<CompanySupplier> AddAsync(CompanySupplier companySupplier, CancellationToken ct);
     Task<CompanySupplier> UpdateAsync(CompanySupplier companySupplier, CancellationToken ct);
-    Task<CompanySupplier> DeleteAsync(int id, CancellationToken ct);
+    Task<CompanySupplier> DeleteAsync(int companyId, int supplierId, CancellationToken ct);
     Task<PagedResultDto<CompanySupplier>> GetAllWithFilterAsync(GetAllCompanySupplierFilterDto filter, CancellationToken ct);
 }

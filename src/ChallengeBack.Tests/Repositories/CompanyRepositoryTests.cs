@@ -349,7 +349,7 @@ public class CompanyRepositoryTests : IClassFixture<PostgresFixture>
         {
             companies.Add(new Company
             {
-                Cnpj = $"{i:D14}0001{i:D2}",
+                Cnpj = $"{i:D13}1",
                 FantasyName = $"Company {i}",
                 ZipCode = $"{i:D8}",
                 State = "SP"

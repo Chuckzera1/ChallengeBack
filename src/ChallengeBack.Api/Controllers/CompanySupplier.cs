@@ -36,12 +36,12 @@ public class CompanySupplierController : ControllerBase
         return Created();
     }
 
-    [HttpDelete("{id}")]
+    [HttpDelete("{companyId}/{supplierId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Delete(int id, CancellationToken ct)
+    public async Task<IActionResult> Delete(int companyId, int supplierId, CancellationToken ct)
     {
-        await _deleteCompanySupplierService.Execute(id, ct);
+        await _deleteCompanySupplierService.Execute(companyId, supplierId, ct);
         return Ok();
     }
 

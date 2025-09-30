@@ -32,5 +32,8 @@ public class AutoMapperProfile : Profile
         CreateMap<CompanySupplier, SupplierCompanyResponseDto>();
             
         CreateMap<CompanySupplier, CompanySupplierListDto>();
+        
+        // Mapeamento para CompanySupplierResponseDto usado em CompanyResponseDto
+        CreateMap<CompanySupplier, CompanySupplierResponseDto>();
     }
 }

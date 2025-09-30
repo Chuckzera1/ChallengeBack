@@ -176,7 +176,7 @@ public class CompanySupplierRepositoryTests : IClassFixture<PostgresFixture>
         await _context.CompanySuppliers.AddAsync(companySupplier);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.DeleteAsync(companySupplier.Id, CancellationToken.None);
+        var result = await _repository.DeleteAsync(companySupplier.CompanyId, companySupplier.SupplierId, CancellationToken.None);
 
         Assert.NotNull(result);
         Assert.Equal(companySupplier.Id, result.Id);
@@ -195,7 +195,7 @@ public class CompanySupplierRepositoryTests : IClassFixture<PostgresFixture>
         var nonExistentId = 999;
 
         var exception = await Assert.ThrowsAsync<Exception>(() => 
-            _repository.DeleteAsync(nonExistentId, CancellationToken.None));
+            _repository.DeleteAsync(nonExistentId, nonExistentId, CancellationToken.None));
         
         Assert.Equal("CompanySupplier not found", exception.Message);
     }

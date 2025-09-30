@@ -27,8 +27,10 @@ public class CompanySupplierRepository : ICompanySupplierRepository {
         return companySupplier;
     }
     
-    public async Task<CompanySupplier> DeleteAsync(int id, CancellationToken ct) {
-        var companySupplier = await _context.CompanySuppliers.FindAsync(id, ct) ?? throw new Exception("CompanySupplier not found");
+    public async Task<CompanySupplier> DeleteAsync(int companyId, int supplierId, CancellationToken ct) {
+        var companySupplier = await _context.CompanySuppliers
+            .FirstOrDefaultAsync(cs => cs.CompanyId == companyId && cs.SupplierId == supplierId, ct)
+             ?? throw new Exception("CompanySupplier not found");
         _context.CompanySuppliers.Remove(companySupplier);
         await _context.SaveChangesAsync(ct);
         return companySupplier;
