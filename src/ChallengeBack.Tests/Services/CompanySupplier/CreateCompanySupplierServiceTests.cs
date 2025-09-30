@@ -1,7 +1,7 @@
 using ChallengeBack.Application.Dto.CompanySupplier;
 using ChallengeBack.Application.Interfaces.Repositories;
+using ChallengeBack.Application.Interfaces.Services;
 using ChallengeBack.Application.Services.CompanySupplier;
-using ChallengeBack.Domain.Entities;
 using ChallengeBack.Domain.Enums;
 using CompanyEntity = ChallengeBack.Domain.Entities.Company;
 using SupplierEntity = ChallengeBack.Domain.Entities.Supplier;

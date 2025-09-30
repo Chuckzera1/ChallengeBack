@@ -1,5 +1,5 @@
-using ChallengeBack.Application.Dto.CompanySupplier;
 using ChallengeBack.Application.Interfaces.Repositories;
+using ChallengeBack.Application.Interfaces.Services;
 
 namespace ChallengeBack.Application.Services.CompanySupplier;
 

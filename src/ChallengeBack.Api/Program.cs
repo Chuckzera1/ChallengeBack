@@ -22,6 +22,14 @@ builder.Services.AddHttpClient();
 // Add AutoMapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
 
+builder.Services.AddCors(opt => {
+    opt.AddDefaultPolicy(policy => {
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Apply database migrations automatically
@@ -31,12 +39,13 @@ using (var scope = app.Services.CreateScope())
     context.Database.Migrate();
 }
 
+app.UseCors();
+
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
-// Map controllers
 app.MapControllers();
 
 app.Run();
